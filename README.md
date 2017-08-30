@@ -7,7 +7,7 @@ Install File Dependencies for this program by running:-
 sudo pip install -r requirements.txt
 ```
 Before using this program,
-Create a file named `apikeys.py` and get an API Key from [News Articles API](https://newsapi.org/account) after creating an account there and then in that file, enter
+Create a file named `apikeys.py` and get an API Key from [News Articles API](https://newsapi.org/register) after creating an account check [this link](https://newsapi.org/account)and then in the `apikeys.py` file, enter
 ```python
 apikey=XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
 ```
