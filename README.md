@@ -16,6 +16,6 @@ After which one can run the program (on Ubuntu) by:
 sudo python3 DailyNews.py
 ```
 ### Known Bugs/Issues
-Currently, the program is known to run slowly (takes atleast 5-6 min) which is due to single-threadedness.Multithreading will be added soon.
+Currently, the program is known to run slowly (takes atleast 5-6 min) which is bound to occur on slow internet connections, the appropriate timeouts will be added soon, and if possible, multiprocessing (instead of multithreading) may be needed to optimize this program/script.
 
 Powered by:[NewsAPI](https://newsapi.org)
