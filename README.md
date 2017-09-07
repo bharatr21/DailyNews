@@ -4,7 +4,7 @@ Runs on Python3 (v3.5 and above) on Ubuntu
 
 Install File Dependencies for this program by running:-
 ```sh
-sudo pip install -r requirements.txt
+sudo pip3 install -r requirements.txt
 ```
 Before using this program,
 Create a file named `apikeys.py` and get an API Key from [News Articles API](https://newsapi.org/register) after creating an account check [this link](https://newsapi.org/account) and then in the `apikeys.py` file, enter
