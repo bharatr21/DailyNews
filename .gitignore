@@ -1,7 +1,9 @@
 !.gitignore
 __pycache__
 /__pycache__
+/DailyNews/Images
 /DailyNews
 /Images
 apikeys.py
 *.sh
+*.log

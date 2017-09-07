@@ -1,6 +1,7 @@
 import requests as req
 import grequests
-import threading
+import multiprocessing
+from multiprocessing import Process
 import os
 import sys
 import re
@@ -11,35 +12,36 @@ import urllib.request
 from urllib.parse import urlencode
 #import time
 #t = time.process_time()
-class FetcherThread(threading.Thread):
-	def __init__(self,arg=None):
-		threading.Thread.__init__(self)
-		self.arg = arg
-	def run(self):
-		# elif(KeyboardInterrupt):
-		#     sys.exit()
-            with open(os.path.join(mypath,str(self.arg['source']))+".txt","w+") as f:
-                f.write('~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-                f.write(str(self.arg['source']).title()+'\n')
-                f.write('~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
-                for k in range(len(self.arg['articles'])):
-                    f.write('-----------------------------------------------------\n')
-                    f.write(str(self.arg['articles'][k]['title'])+'\n')
-                    f.write('-----------------------------------------------------\n')
-                    f.write(str(self.arg['articles'][k]['description'])+'\n')
-                    f.write('-----------------------------------------------------\n')
-                    f.write('Author:-'+str(self.arg['articles'][k]['author'])+'\n')
-                    f.write('-----------------------------------------------------\n')
-                    if self.arg['articles'][k]['urlToImage'] is not None:
-                        try:
-                            os.chdir(imgpath)
-                        except (OSError,WindowsError):
-                            os.chdir(mypath)
-                        try:
-                            print('Downloading images embedded in articles from {}'.format(self.arg['source']))
-                            urllib.request.urlretrieve(self.arg['articles'][k]['urlToImage'],'{}-{}'.format(self.arg['source'],k+1))
-                        except:
-                            print('No images found for the {}th {} article.'.format(k+1,self.arg['source']))
+def printinfo(string):
+	with open('DailyNews.log','a+') as f1:
+		f1.write(string)
+def Worker(arg):
+	# elif(KeyboardInterrupt):
+	#     sys.exit()
+    with open(os.path.join(mypath,str(arg['source']))+".txt","w+") as f:
+        f.write('~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
+        f.write(str(arg['source']).title()+'\n')
+        f.write('~~~~~~~~~~~~~~~~~~~~~~~~~~\n')
+        for k in range(len(arg['articles'])):
+            f.write('-----------------------------------------------------\n')
+            f.write(str(arg['articles'][k]['title'])+'\n')
+            f.write('-----------------------------------------------------\n')
+            f.write(str(arg['articles'][k]['description'])+'\n')
+            f.write('-----------------------------------------------------\n')
+            f.write('Author:-'+str(arg['articles'][k]['author'])+'\n')
+            f.write('-----------------------------------------------------\n')
+            if arg['articles'][k]['urlToImage'] is not None:
+                try:
+                    os.chdir(imgpath)
+                except (OSError,WindowsError):
+                    os.chdir(mypath)
+                try:
+                    c='Downloading images embedded in articles from {}'.format(arg['source'])
+                    printinfo(c)
+                    urllib.request.urlretrieve(arg['articles'][k]['urlToImage'],'{}-{}'.format(arg['source'],k+1))
+                except:
+                    d='No images found for the {}th {} article.'.format(k+1,arg['source'])
+                    printinfo(d)
 cwd = os.getcwd()
 mypath = os.path.join(cwd,'DailyNews')
 imgpath = os.path.join(mypath,'Images')
@@ -65,22 +67,25 @@ r = grequests.map(responses)
 rsonlist=[]
 for i in range(len(r)):
     if r is None:
-        pass
+    	x='Whole Object is None'
+    	printinfo(x)
     elif r[i] is None:
-        pass    
-    elif r[i] is not None:    
-        rso=r[i].json()        
-    elif rso['status']=='error':
-        pass
+        y='Particular object is None'
+        printinfo(y)
     elif r[i] is not None:
+        rso=r[i].json()
+    elif rso['status']=='error':
+        z='Response Error'
+        printinfo(z)
+    if r[i] is not None and rso['status']!='error':
         rsonlist.append(r[i].json())
-k=len(rsonlist)		
-# for i in range(k):
-# 	print(rsonlist[i]['source'])			
-t=[FetcherThread(rsonlist[i]) for i in range(k)]
-for th in t:
-	th.run()
-for th in t:
-    th.join()
+k=len(rsonlist)
+a='Requests completed'
+printinfo(a)
+p=[Process(target=Worker,args=(rsonlist[i],)) for i in range(k)]
+for process in p:
+	process.start()
+for process in p:
+	process.join()	 
 #elapsed_time = time.process_time()-t
 #print("\nTime Taken: %ds\n"%(elapsed_time))
