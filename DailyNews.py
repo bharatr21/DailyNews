@@ -1,5 +1,8 @@
 import requests as req
-import grequests
+from requests.exceptions import ConnectionError as ce
+from urllib3.exceptions import MaxRetryError,NewConnectionError
+import asyncio
+import concurrent.futures
 import multiprocessing
 from multiprocessing import Process
 import os
@@ -62,8 +65,18 @@ for i in range(len(sites)):
         qstring=urlencode(payload)
         url='https://newsapi.org/v1/articles?'+qstring
         url_list.append(url)
-responses = [grequests.get(u) for u in url_list]
-r = grequests.map(responses)
+r = []        
+async def webreqsend():
+	with concurrent.futures.ThreadPoolExecutor(max_workers=20) as Executor:
+		loop = asyncio.get_event_loop()
+		try:
+			futures = [loop.run_in_executor(Executor,req.get,u) for u in url_list]
+		except (ce,MaxRetryError,TimeoutError,NewConnectionError) as e:
+			printinfo(e)
+		for responses in await asyncio.gather(*futures):
+			r.append(responses)
+loop = asyncio.get_event_loop()
+loop.run_until_complete(webreqsend())
 rsonlist=[]
 for i in range(len(r)):
     if r is None:
@@ -86,6 +99,6 @@ p=[Process(target=Worker,args=(rsonlist[i],)) for i in range(k)]
 for process in p:
 	process.start()
 for process in p:
-	process.join()	 
+	process.join() 
 #elapsed_time = time.process_time()-t
 #print("\nTime Taken: %ds\n"%(elapsed_time))
